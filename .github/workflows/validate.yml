@@ -1,0 +1,30 @@
+name: Validate installer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shell-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: bash -n install.sh
+      - name: Check whitespace and conflict markers
+        shell: bash
+        run: |
+          if grep -nE '^(<<<<<<<|=======|>>>>>>>)' install.sh; then
+            echo "Merge conflict markers found"
+            exit 1
+          fi
+          if grep -n $'\r' install.sh; then
+            echo "CRLF line endings found"
+            exit 1
+          fi
