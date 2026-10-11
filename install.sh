@@ -5,7 +5,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 umask 077
 
-APP_VERSION="1.0.1"
+APP_VERSION="1.0.2"
 LOG_DIR="/var/log/lordxstar-installer"
 LOG_FILE=""
 C_RESET=$'\033[0m'; C_CYAN=$'\033[1;36m'; C_MAGENTA=$'\033[1;35m'
@@ -127,13 +127,14 @@ run_panel_backend() {
   admin_pass="$(random_secret)"
   local installer="/tmp/lordxstar-backend-$$.sh"
 
-  # DNS must already resolve before requesting Let's Encrypt certificates.
+  # Require DNS before starting; the backend requests Let's Encrypt certificates.
   if ! command -v getent >/dev/null 2>&1 || ! getent ahosts "$panel_domain" >/dev/null 2>&1; then
-    warn "DNS lookup for $panel_domain did not resolve. SSL setup may fail."
-    warn "Make sure the domain points to this VPS before continuing."
-    printf 'Continue anyway? [y/N]: '
-    local confirm; read -r confirm || confirm=""
-    [[ "$confirm" =~ ^[Yy]$ ]] || return 0
+    error "DNS for $panel_domain does not resolve. Point its A/AAAA record to this VPS, wait for propagation, then retry."
+    return 1
+  fi
+  if [[ "$mode" == "both" ]] && ! getent ahosts "$wings_domain" >/dev/null 2>&1; then
+    error "DNS for $wings_domain does not resolve. Create its A/AAAA record to this VPS, wait for propagation, then retry."
+    return 1
   fi
 
   export PANEL_DOMAIN="$panel_domain"
@@ -148,6 +149,7 @@ run_panel_backend() {
   info "Panel domain: $panel_domain"
   info "Administrator email: $admin_email"
   info "Backend output is hidden; detailed output is stored in the protected log."
+  info "The upstream backend runs in non-interactive mode (--yes) using the validated environment settings."
   if ! progress_run "Downloading installation backend" curl -fsSL --connect-timeout 15 --max-time 120 "https://raw.githubusercontent.com/2hoch1/pterodactyl-installer/main/get.sh" -o "$installer"; then
     rm -f "$installer"
     error "Backend download failed. Check network access."
@@ -193,7 +195,7 @@ run_panel_backend() {
   warn "DNS for $panel_domain must point to this VPS; ports 80 and 443 must be reachable."
   if [[ "$mode" == "both" ]]; then
     warn "Wings hostname is $wings_domain. Create DNS for it pointing to this VPS too."
-    warn "Confirm the backend successfully created/configured the node before hosting servers."
+    warn "Verify Admin > Nodes shows the new node and Wings is active before creating servers."
   fi
 }
 
