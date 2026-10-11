@@ -32,7 +32,7 @@ sudo ./install.sh
 ## Menu
 
 - `1` — Install Panel. Enter the Panel domain; the script chooses an admin email and generates database credentials.
-- `2` — Wings-only guidance. Wings needs a valid node configuration token from an existing Panel, so this option does not pretend to install a usable node without one.
+- `2` — Install Wings on a server with an existing Panel node. Paste the complete `config.yml` copied from **Admin > Nodes > Configuration**, ending input with `END_CONFIG`. The installer installs Docker and Wings, stores the config with root-only permissions, and enables the service. The node must already exist in the Panel.
 - `3` — Install Panel + Wings. Uses `node.<base-domain>` as the Wings hostname.
 - `4` — Uninstaller information. Destructive uninstallation is intentionally disabled.
 - `0` — Exit.
