@@ -18,7 +18,7 @@ A clean, menu-driven Bash installer UI for Pterodactyl Panel and Wings.
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
 
-Use a fresh VPS as root. The Panel domain must resolve to the VPS and inbound ports 80/443 must be reachable for TLS. For combined Panel + Wings, the generated `node.<base-domain>` hostname must also resolve to the VPS.
+Use a fresh VPS as root. The Panel domain must resolve to the VPS and inbound ports 80/443 must be reachable for TLS. For combined Panel + Wings, the generated `node.<base-domain>` hostname must also resolve to the VPS. The script stops before installation if the required DNS name(s) do not resolve.
 
 ## Run
 
